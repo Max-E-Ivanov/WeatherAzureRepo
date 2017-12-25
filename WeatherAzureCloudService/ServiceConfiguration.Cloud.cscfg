@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ServiceConfiguration serviceName="WeatherAzureCloudService" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration" osFamily="5" osVersion="*" schemaVersion="2015-04.2.6">
+  <Role name="WeatherWCFServiceWebRole">
+    <Instances count="1" />
+    <ConfigurationSettings>
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="DefaultEndpointsProtocol=https;AccountName=azurewcf;AccountKey=$(_azurewcf.key_)" />
+      <Setting name="APPINSIGHTS_INSTRUMENTATIONKEY" value="cf8eaf39-db85-4681-b7fe-15bdeca64169" />
+    </ConfigurationSettings>
+  </Role>
+</ServiceConfiguration>
