@@ -13,6 +13,7 @@ namespace WeatherWCFServiceWebRole
     public interface IWeatherService
     {
 
+
         [OperationContract]
         WeatherDetails GetCurrentWeather(string sCountry, string sCity, string sLang);
 
