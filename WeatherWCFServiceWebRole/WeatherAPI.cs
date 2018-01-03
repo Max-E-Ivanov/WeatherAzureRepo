@@ -5,6 +5,9 @@ using System.Web;
 using System.Net;
 using System.IO;
 using System.Xml.Serialization;
+using System.Globalization;
+using System.ServiceModel;
+using System.ServiceModel.Channels;
 
 namespace WeatherWCFServiceWebRole
 {
@@ -18,13 +21,11 @@ namespace WeatherWCFServiceWebRole
     {
         static string sAPIKey = "5692fbc0aad1c262";
 
-      
-
-        static string MakeRequest(string sParams)
+        static string MakeWebRequest(string sRequest)
         {
             try
             {
-                HttpWebRequest apiRequest = WebRequest.Create("http://api.wunderground.com/api/"+sAPIKey+"/"+sParams + ".xml") as HttpWebRequest;
+                HttpWebRequest apiRequest = WebRequest.Create(sRequest) as HttpWebRequest;
 
                 using (HttpWebResponse response = apiRequest.GetResponse() as HttpWebResponse)
                 {
@@ -32,6 +33,19 @@ namespace WeatherWCFServiceWebRole
                     string apiResponse = reader.ReadToEnd();
                     return apiResponse;
                 }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error while making request " + ex.Message, ex);
+            }
+        }
+
+
+        static string MakeWeatherRequest(string sParams)
+        {
+            try
+            {
+                return MakeWebRequest("http://api.wunderground.com/api/" + sAPIKey + "/" + sParams + ".xml");
             }
             catch (Exception ex)
             {
@@ -50,7 +64,7 @@ namespace WeatherWCFServiceWebRole
             try
             {               
                 string sParams = @"conditions"+ (string.IsNullOrEmpty(sLang)?"": "/lang:"+sLang)+"/q/"+sCountry+"/"+sCity;
-                string sResponse = MakeRequest( sParams);
+                string sResponse = MakeWeatherRequest( sParams);
 
                 XmlSerializer serializer = new XmlSerializer(typeof(WeatherData));
                 
@@ -77,7 +91,7 @@ namespace WeatherWCFServiceWebRole
             try
             {
                 string sParams = @"almanac" + (string.IsNullOrEmpty(sLang) ? "" : "/lang:" + sLang) + "/q/" + sCountry + "/" + sCity;
-                string sResponse = MakeRequest(sParams);
+                string sResponse = MakeWeatherRequest(sParams);
 
                 XmlSerializer serializer = new XmlSerializer(typeof(AlmanacData));
 
@@ -91,6 +105,70 @@ namespace WeatherWCFServiceWebRole
             catch (Exception ex)
             {
                 throw new Exception("Error while getting weather almanac for " + sCountry + "/" + sCity, ex);
+            }
+        }
+
+        static public List<Tuple<string, string, string>> GetCountriesList()
+        {
+            try
+            {
+
+                List<Tuple<string, string, string>> lsCountries = new List<Tuple<string, string, string>>();
+
+                CultureInfo[] cultures = CultureInfo.GetCultures(CultureTypes.SpecificCultures);
+                foreach (CultureInfo culture in cultures)
+                {
+                    RegionInfo region = new RegionInfo(culture.Name);
+
+                    if (!lsCountries.Exists( t=> t.Item1 == region.EnglishName))
+                    {
+                        lsCountries.Add( new Tuple<string, string, string>(region.EnglishName, region.TwoLetterISORegionName, region.NativeName));
+                    }
+                }
+
+                return new List<Tuple<string, string, string>>(lsCountries.OrderBy(t=>t.Item3));
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error while getting countries list", ex);
+            }
+        }
+
+        private static string GetClientIP()
+        {
+            OperationContext context = OperationContext.Current;
+            MessageProperties prop = context.IncomingMessageProperties;
+            RemoteEndpointMessageProperty endpoint =
+                   prop[RemoteEndpointMessageProperty.Name] as RemoteEndpointMessageProperty;
+            string ip = endpoint.Address;
+            return ip;
+        }
+
+        static public KeyValuePair<string, string> GetCurrentCity()
+        {
+            try
+            {
+                
+                string sClientIP = GetClientIP();               
+                if (string.IsNullOrEmpty(sClientIP))
+                    return new KeyValuePair<string, string>();
+
+                string sResponse = MakeWebRequest(@"http://ip-api.com/xml/" + sClientIP);
+
+                XmlSerializer serializer = new XmlSerializer(typeof(LoactionByIP));
+
+                using (TextReader reader = new StringReader(sResponse))
+                {
+                    LoactionByIP result = (LoactionByIP)serializer.Deserialize(reader);
+
+                    return new KeyValuePair<string, string>(result.country, result.city);
+                }
+
+                
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error while getting calling user city", ex);
             }
         }
     }

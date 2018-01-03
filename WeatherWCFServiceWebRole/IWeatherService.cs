@@ -12,7 +12,11 @@ namespace WeatherWCFServiceWebRole
     [ServiceContract]
     public interface IWeatherService
     {
+        [OperationContract]
+        KeyValuePair<string, string> GetCurrentCity();
 
+        [OperationContract]
+        List<Tuple<string, string, string>> GetCountriesList();
 
         [OperationContract]
         WeatherDetails GetCurrentWeather(string sCountry, string sCity, string sLang);

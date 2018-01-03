@@ -6,9 +6,31 @@ using System.Xml.Serialization;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Runtime.Serialization;
+using System.ComponentModel;
 
 namespace WeatherWCFServiceWebRole
 {
+    [Serializable]
+    [XmlRoot("query")]
+    public class LoactionByIP
+    {
+        public LoactionByIP()
+        {
+            country = "";
+            city = "";
+        }
+
+        [DefaultValue("")]
+        public string status { get; set; }
+        [DefaultValue("")]
+        public string country { get; set; }
+        [DefaultValue("")]
+        public string city { get; set; }
+
+
+     
+
+    }
     #region Current weather
     [Serializable]
     [XmlRoot("response")]

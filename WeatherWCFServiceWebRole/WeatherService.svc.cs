@@ -12,6 +12,19 @@ namespace WeatherWCFServiceWebRole
     // NOTE: In order to launch WCF Test Client for testing this service, please select Service1.svc or Service1.svc.cs at the Solution Explorer and start debugging.
     public class WeatherService : IWeatherService
     {
+
+        public List<Tuple<string, string, string>> GetCountriesList()
+        {
+            try
+            {
+                return WeatherAPI.GetCountriesList();
+            }
+            catch (Exception ex)
+            {
+                throw new FaultException(ex.Message);
+            }
+        }
+
         public WeatherDetails GetCurrentWeather(string sCountry, string sCity, string sLang)
         {
             try
@@ -30,6 +43,18 @@ namespace WeatherWCFServiceWebRole
             try
             {
                 return WeatherAPI.GetAlmanacWeather(sCountry, sCity, sLang);
+            }
+            catch (Exception ex)
+            {
+                throw new FaultException(ex.Message);
+            }
+        }
+
+        public KeyValuePair<string, string> GetCurrentCity()
+        {
+            try
+            {
+                return WeatherAPI.GetCurrentCity();
             }
             catch (Exception ex)
             {
