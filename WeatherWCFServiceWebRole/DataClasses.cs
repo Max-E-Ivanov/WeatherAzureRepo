@@ -12,6 +12,7 @@ namespace WeatherWCFServiceWebRole
 {
     [Serializable]
     [XmlRoot("query")]
+    [DataContract]
     public class LoactionByIP
     {
         public LoactionByIP()
@@ -21,16 +22,30 @@ namespace WeatherWCFServiceWebRole
         }
 
         [DefaultValue("")]
+        [DataMember]
         public string status { get; set; }
         [DefaultValue("")]
+        [DataMember]
         public string country { get; set; }
         [DefaultValue("")]
+        [DataMember]
         public string city { get; set; }
+    }
 
-
-     
+    [DataContract]
+    public class Country
+    {
+        public Country()
+        { }
+        [DataMember]
+        public string country_en { get; set; }
+        [DataMember]
+        public string country_code { get; set; }
+        [DataMember]
+        public string country_native { get; set; }
 
     }
+
     #region Current weather
     [Serializable]
     [XmlRoot("response")]

@@ -108,25 +108,30 @@ namespace WeatherWCFServiceWebRole
             }
         }
 
-        static public List<Tuple<string, string, string>> GetCountriesList()
+        static public List<Country> GetCountriesList()
         {
             try
             {
 
-                List<Tuple<string, string, string>> lsCountries = new List<Tuple<string, string, string>>();
+                List<Country> lsCountries = new List<Country>();
 
                 CultureInfo[] cultures = CultureInfo.GetCultures(CultureTypes.SpecificCultures);
                 foreach (CultureInfo culture in cultures)
                 {
                     RegionInfo region = new RegionInfo(culture.Name);
 
-                    if (!lsCountries.Exists( t=> t.Item1 == region.EnglishName))
+                    if (!lsCountries.Exists( t=> t.country_en == region.EnglishName))
                     {
-                        lsCountries.Add( new Tuple<string, string, string>(region.EnglishName, region.TwoLetterISORegionName, region.NativeName));
+                        lsCountries.Add(new Country {
+                            country_en = region.EnglishName,
+                            country_code = region.TwoLetterISORegionName,
+                            country_native = region.NativeName
+                        
+                        } );
                     }
                 }
 
-                return new List<Tuple<string, string, string>>(lsCountries.OrderBy(t=>t.Item3));
+                return new List<Country>(lsCountries.OrderBy(t=>t.country_en));
             }
             catch (Exception ex)
             {
@@ -144,14 +149,18 @@ namespace WeatherWCFServiceWebRole
             return ip;
         }
 
-        static public KeyValuePair<string, string> GetCurrentCity()
+        static public LoactionByIP GetCurrentCity()
         {
             try
             {
-                
-                string sClientIP = GetClientIP();               
+                LoactionByIP location = new LoactionByIP();
+
+                string sClientIP = GetClientIP();
                 if (string.IsNullOrEmpty(sClientIP))
-                    return new KeyValuePair<string, string>();
+                {
+                    location.status = "Empty IP";
+                }
+                
 
                 string sResponse = MakeWebRequest(@"http://ip-api.com/xml/" + sClientIP);
 
@@ -161,9 +170,8 @@ namespace WeatherWCFServiceWebRole
                 {
                     LoactionByIP result = (LoactionByIP)serializer.Deserialize(reader);
 
-                    return new KeyValuePair<string, string>(result.country, result.city);
+                    return result;
                 }
-
                 
             }
             catch (Exception ex)

@@ -13,7 +13,7 @@ namespace WeatherWCFServiceWebRole
     public class WeatherService : IWeatherService
     {
 
-        public List<Tuple<string, string, string>> GetCountriesList()
+        public List<Country> GetCountriesList()
         {
             try
             {
@@ -50,7 +50,56 @@ namespace WeatherWCFServiceWebRole
             }
         }
 
-        public KeyValuePair<string, string> GetCurrentCity()
+        public LoactionByIP GetCurrentCity()
+        {
+            try
+            {
+                return WeatherAPI.GetCurrentCity();
+            }
+            catch (Exception ex)
+            {
+                throw new FaultException(ex.Message);
+            }
+        }
+
+        public List<Country> GetCountriesListREST()
+        {
+            try
+            {
+                return WeatherAPI.GetCountriesList();
+            }
+            catch (Exception ex)
+            {
+                throw new FaultException(ex.Message);
+            }
+        }
+
+        public WeatherDetails GetCurrentWeatherREST(string sCountry, string sCity, string sLang)
+        {
+            try
+            {
+                return WeatherAPI.GetCurrentWeather(sCountry, sCity, sLang);
+            }
+            catch (Exception ex)
+            {
+                throw new FaultException(ex.Message);
+            }
+        }
+
+
+        public AlmanacDetails GetAlmanacWeatherREST(string sCountry, string sCity, string sLang)
+        {
+            try
+            {
+                return WeatherAPI.GetAlmanacWeather(sCountry, sCity, sLang);
+            }
+            catch (Exception ex)
+            {
+                throw new FaultException(ex.Message);
+            }
+        }
+
+        public LoactionByIP GetCurrentCityREST()
         {
             try
             {
